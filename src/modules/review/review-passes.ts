@@ -53,6 +53,10 @@ export class ReviewPasses {
         private readonly progress: ProgressRunner,
     ) {}
 
+    getIndexStamp(): string {
+        return this.indexStamp;
+    }
+
     getHead(): string {
         return this.head;
     }

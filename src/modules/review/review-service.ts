@@ -69,6 +69,7 @@ export class ReviewService implements vscode.Disposable {
     private reverter: ReviewFileReverter | undefined;
     private trackedLines: TrackedLines | undefined;
     private lineCounting: Promise<void> = Promise.resolve();
+    private countedIndexStamp = '';
     private passes: ReviewPasses | undefined;
     private collector: BlobGarbageCollector | undefined;
     private isStarted = false;
@@ -327,6 +328,7 @@ export class ReviewService implements vscode.Disposable {
             await passes.partial(result.reverted.map(repoPath => engine.scope.absolutePath(repoPath)), true);
         });
         this.emitter.fire();
+        this.countLines(false, []);
         return report;
     }
 
@@ -396,6 +398,7 @@ export class ReviewService implements vscode.Disposable {
             });
         });
         this.emitter.fire();
+        this.countLines(false, []);
         return report;
     }
 
@@ -465,11 +468,13 @@ export class ReviewService implements vscode.Disposable {
     private countLines(isAll: boolean, fsPaths: readonly string[]): void {
         const counter = this.trackedLines;
         const scope = this.engine?.scope;
+        const indexStamp = this.passes?.getIndexStamp() ?? '';
         if (!counter || !scope) {
             return;
         }
         this.lineCounting = this.lineCounting.then(async () => {
-            if (isAll) {
+            if (isAll || indexStamp !== this.countedIndexStamp) {
+                this.countedIndexStamp = indexStamp;
                 await counter.refreshAll();
             } else {
                 await counter.refreshPaths(fsPaths.flatMap(fsPath => scope.toRepoPath(fsPath) ?? []));
