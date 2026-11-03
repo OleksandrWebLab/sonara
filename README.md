@@ -39,7 +39,7 @@ Review uncommitted changes in steps instead of two buckets (changed / staged). B
 - A repository, a level and a folder have **Expand All** and **Collapse All** buttons that open or close everything inside them, folders included; Collapse All keeps the level or folder itself open
 - Move a folder, a file, or a whole level with **Move Up**, **Move Down**, or straight to a level with **Move to Read**, **Move to Verified** and the rest, right in the context menu. Moving to Staged Changes stages the changes, moving down from it unstages them
 - Click a file to open the changes of that level only: the left side is `HEAD` plus all levels above, the right side adds this level. Both sides are read-only; **Open File** opens the real file for editing, and for a markdown file **Open Preview** renders the right side in a tab of the same column
-- A binary file is not forced into a text comparison: both versions open side by side in one Sonara tab, before on the left and after on the right, with their sizes: an image as an image, audio in a player, video in a video player; other types show their sizes only. The two audio or video players are linked: play, pause, seeking and speed on one are repeated on the other, so both stay on the same second; when one version is shorter, it stops on its last frame while the longer one goes on, and seeking back brings both together again. The tab is reused: clicking the next binary file replaces its content instead of opening another tab. Levels keep copies of binary files up to 50 MB, so any level opens as a before/after pair; a larger file is kept by its fingerprint only, and a side that was not kept, was added or was deleted says so in its place
+- A binary file is not forced into a text comparison: both versions open side by side in one Sonara tab, before on the left and after on the right, with their sizes: an image as an image, audio in a player, video in a video player; other types show their sizes only. AAC sound plays the same way as in the Media Preview below: from a copy with the sound converted to MP3. The two audio or video players are linked: play, pause, seeking and speed on one are repeated on the other, so both stay on the same second; when one version is shorter, it stops on its last frame while the longer one goes on, and seeking back brings both together again. The tab is reused: clicking the next binary file replaces its content instead of opening another tab. Levels keep copies of binary files up to 50 MB, so any level opens as a before/after pair; a larger file is kept by its fingerprint only, and a side that was not kept, was added or was deleted says so in its place
 - **Revert Changes** in the context menu of a file or folder returns the files to `HEAD` after a confirmation: the changes on every level, Staged Changes included, are discarded; a file that is new is moved to the Trash. It cannot be undone, so the confirmation lists what will be lost
 - **Open with Default Application** in the context menu of a file (Review and Code Map) opens it with the program the operating system picks for its type, a PDF in the PDF viewer for example
 - The context menu of a file or folder also has the usual actions: **Open Containing Folder**, **Copy Path**, **Copy Relative Path** and **Delete** (moves it to the Trash after a confirmation; a folder goes with everything in it, including files without changes). Copy and Delete work on every selected row. The `...` button on a row opens the same actions as a list, for touch screens and anywhere a right click is out of reach
@@ -65,6 +65,16 @@ See where the code of a project lives, the way a disk usage analyzer shows where
 - Click a file to open it
 - A repository and a folder have **Expand All** and **Collapse All** buttons, the same as in Review
 - The context menu of a file or folder has **Open Containing Folder**, **Copy Path**, **Copy Relative Path** and **Delete** (to the Trash, with a confirmation); copy and delete work on several selected rows at once. A repository row has the same menu without Delete
+
+### Media Preview
+
+VS Code's own player cannot play AAC sound, the usual sound of mp4 and m4a files: the picture plays, the volume button stays grey. Sonara Media Preview is the default viewer for `.mp4`, `.mov`, `.m4v` and `.m4a` files wherever they are opened: the Explorer, Code Map, Quick Open, a git diff.
+
+- A file with sound VS Code cannot play (AAC, Opus) plays from a copy where the picture stays as it is and the sound is converted to MP3 with `ffmpeg`; the file itself is not changed. A file with MP3, Vorbis, FLAC or PCM sound, or with no sound, plays as is
+- The copy lives in the extension storage while the tab is open; copies left by a closed window are removed a day later
+- Without `ffmpeg` and `ffprobe` on the `PATH` the player stays silent and says so; **Open with Default Application** plays the sound
+- VS Code's own viewer stays available through **Open With...**
+- What was checked and converted is logged to the **Sonara Media Preview** output channel
 
 ### Voice
 

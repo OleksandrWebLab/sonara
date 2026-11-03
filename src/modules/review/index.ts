@@ -20,6 +20,7 @@ import { REVIEW_LEVELS, ReviewLevel, SHOWN_LEVELS } from './types';
 import { ChangeMoveDirection, LevelChangeLensProvider, MOVE_CHANGE_COMMAND, ProjectChangeReference } from './view/level-change-lens-provider';
 import { DiffCodeLensPrompt } from './view/diff-code-lens-prompt';
 import { BinaryLevelPreview } from './view/binary-level-preview';
+import { PreviewAudioTranscoder } from '../../shared/media/preview-audio-transcoder';
 import { LevelDocumentProvider } from './view/level-document-provider';
 import { ReviewDiffOpener } from './view/review-diff-opener';
 import { ReviewNode } from './view/review-node';
@@ -136,7 +137,10 @@ export function registerReviewModule(context: vscode.ExtensionContext, catalog: 
     };
     context.subscriptions.push(services.onDidChange(updateView));
     const documents = new LevelDocumentProvider(services);
-    const binaryPreview = new BinaryLevelPreview(vscode.Uri.joinPath(context.globalStorageUri, 'review-binary-preview'));
+    const binaryPreview = new BinaryLevelPreview(
+        vscode.Uri.joinPath(context.globalStorageUri, 'review-binary-preview'),
+        new PreviewAudioTranscoder(logger),
+    );
     void binaryPreview.clear();
     const opener = new ReviewDiffOpener(documents, new DiffCodeLensPrompt(context.globalState, logger), services, binaryPreview);
     const lenses = new LevelChangeLensProvider(documents);

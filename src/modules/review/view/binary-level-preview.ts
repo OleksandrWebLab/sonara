@@ -1,10 +1,13 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
+import { isPlayer, mediaKind } from '../../../shared/media/media-kind';
+import { PreviewAudioTranscoder, PreviewMedia } from '../../../shared/media/preview-audio-transcoder';
 import { MAX_BINARY_COPY_BYTES } from '../frontiers/file-stack';
 import { LEVEL_LABELS, LevelDocument, LevelDocumentSideName, ReviewLevel } from '../types';
 import { BinarySide, BinarySideContent, buildBinaryDiffHtml } from './binary-diff-html';
 
 const VIEW_TYPE = 'sonara.review.binaryDiff';
+const PLAYABLE_COPY_SUFFIX = '.preview.mp4';
 const NOT_KEPT = `not kept: accepted before Sonara kept copies of binary files, or larger than ${MAX_BINARY_COPY_BYTES / 1024 / 1024} MB`;
 
 function folderName(repoPath: string): string {
@@ -15,7 +18,10 @@ export class BinaryLevelPreview implements vscode.Disposable {
     private panel: vscode.WebviewPanel | undefined;
     private revision = 0;
 
-    constructor(private readonly root: vscode.Uri) {}
+    constructor(
+        private readonly root: vscode.Uri,
+        private readonly transcoder: PreviewAudioTranscoder,
+    ) {}
 
     async clear(): Promise<void> {
         await vscode.workspace.fs.delete(this.root, { recursive: true, useTrash: false }).then(undefined, () => undefined);
@@ -74,8 +80,16 @@ export class BinaryLevelPreview implements vscode.Disposable {
             return { kind: 'note', text: `This version was ${NOT_KEPT}.` };
         }
         const target = await this.write(repoPath, level, side, name, content);
-        const source = webview.asWebviewUri(target).with({ query: `revision=${this.revision}` });
-        return { kind: 'file', source: source.toString(), bytes: content.length };
+        const media = await this.playable(target, name);
+        const source = webview.asWebviewUri(media.file).with({ query: `revision=${this.revision}` });
+        return { kind: 'file', source: source.toString(), bytes: content.length, notice: media.notice };
+    }
+
+    private async playable(target: vscode.Uri, name: string): Promise<PreviewMedia> {
+        if (!isPlayer(mediaKind(name))) {
+            return { file: target };
+        }
+        return this.transcoder.playable(target, target.with({ path: `${target.path}${PLAYABLE_COPY_SUFFIX}` }));
     }
 
     private async write(

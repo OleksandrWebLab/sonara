@@ -7,7 +7,7 @@
   "icon": "media/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/artisanweblab/sonara"
+    "url": "https://github.com/OleksandrWebLab/sonara"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -933,6 +933,27 @@
         "when": "sonara.voice.isRecording"
       }
     ],
+    "customEditors": [
+      {
+        "viewType": "sonara.mediaPreview",
+        "displayName": "Sonara Media Preview",
+        "selector": [
+          { "filenamePattern": "*.mp4" },
+          { "filenamePattern": "*.mov" },
+          { "filenamePattern": "*.m4v" },
+          { "filenamePattern": "*.m4a" }
+        ],
+        "priority": "default"
+      }
+    ],
+    "configurationDefaults": {
+      "workbench.editorAssociations": {
+        "*.mp4": "sonara.mediaPreview",
+        "*.mov": "sonara.mediaPreview",
+        "*.m4v": "sonara.mediaPreview",
+        "*.m4a": "sonara.mediaPreview"
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
