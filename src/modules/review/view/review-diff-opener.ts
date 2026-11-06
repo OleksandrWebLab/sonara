@@ -2,10 +2,15 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import { inactiveMessage } from '../review-service';
 import { ReviewServices } from '../review-services';
-import { LEVEL_LABELS, ReviewLevel } from '../types';
+import { mediaKind } from '../../../shared/media/media-kind';
+import { LEVEL_LABELS, LevelDocument, ReviewLevel } from '../types';
 import { BinaryLevelPreview } from './binary-level-preview';
 import { DiffCodeLensPrompt } from './diff-code-lens-prompt';
 import { LevelDocumentProvider } from './level-document-provider';
+
+function withTextBytes(document: LevelDocument): LevelDocument {
+    return { ...document, binaryBefore: Buffer.from(document.before, 'utf8'), binaryAfter: Buffer.from(document.after, 'utf8') };
+}
 
 function selectionAt(line: number): vscode.Range {
     const position = new vscode.Position(Math.max(line, 0), 0);
@@ -21,10 +26,11 @@ export class ReviewDiffOpener {
     ) {}
 
     async openLevelDiff(project: string, repoPath: string, level: ReviewLevel, revealLine?: number): Promise<void> {
-        if (this.services.get(project)?.getFile(repoPath)?.scanned.kind === 'opaque') {
+        const isOpaque = this.services.get(project)?.getFile(repoPath)?.scanned.kind === 'opaque';
+        if (isOpaque || mediaKind(repoPath) === 'image') {
             const document = await this.documents.document(project, repoPath, level);
             if (document) {
-                await this.binaryPreview.open(`${path.basename(project)}/${repoPath}`, level, document);
+                await this.binaryPreview.open(`${path.basename(project)}/${repoPath}`, level, isOpaque ? document : withTextBytes(document));
                 return;
             }
         }

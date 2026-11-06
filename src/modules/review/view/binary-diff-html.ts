@@ -1,6 +1,7 @@
 import { mediaKind, isPlayer, MediaKind } from '../../../shared/media/media-kind';
 import { escapeHtml, renderMedia, renderNote } from '../../../shared/media/media-player-html';
 import { buildWebviewHtml } from '../../../shared/webview/html-template';
+import { IMAGE_ZOOM_BAR, IMAGE_ZOOM_SCRIPT, IMAGE_ZOOM_STYLES } from './binary-image-zoom-script';
 import { PLAYER_SYNC_SCRIPT } from './binary-player-sync-script';
 
 export type BinarySideContent =
@@ -37,11 +38,13 @@ function renderSide(side: BinarySide, kind: MediaKind): string {
 
 export function buildBinaryDiffHtml(title: string, fileName: string, sides: readonly [BinarySide, BinarySide], mediaSource: string): string {
     const kind = mediaKind(fileName);
+    const isImage = kind === 'image';
+    const main = `<main class="sides${isImage ? ' zoomable' : ''}">${sides.map(side => renderSide(side, kind)).join('')}</main>`;
     return buildWebviewHtml({
         title: escapeHtml(title),
-        body: `<main class="sides">${sides.map(side => renderSide(side, kind)).join('')}</main>`,
-        extraStyles: STYLES,
-        script: isPlayer(kind) ? PLAYER_SYNC_SCRIPT : '',
+        body: isImage ? `${IMAGE_ZOOM_BAR}${main}` : main,
+        extraStyles: isImage ? `${STYLES}${IMAGE_ZOOM_STYLES}` : STYLES,
+        script: isImage ? IMAGE_ZOOM_SCRIPT : isPlayer(kind) ? PLAYER_SYNC_SCRIPT : '',
         mediaSource,
     });
 }
